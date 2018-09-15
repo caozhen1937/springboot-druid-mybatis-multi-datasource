@@ -1,0 +1,40 @@
+druid:
+  master:
+    url: jdbc:mysql://127.0.0.1:3306/bigdata_platform
+    driverClass: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    initial-size: 1
+    min-idle: 1
+    max-active: 20
+    test-on-borrow: true
+    max-wait: 60000
+    time-between-eviction-runs-millis: 60000
+    min-evictable-idle-time-millis: 300000
+    validation-query: SELECT 1
+    test-While-Idle: true
+    test-on-return: false
+    pool-prepared-statements: false
+    max-pool-prepared-statement-per-connection-size: 20
+    filters: stat,wall,log4j,config
+    connection-properties: druid.stat.memvnrgeSql=true;druid.stat.slowSqlMillis=5000;config.decrypt=false
+
+  slave:
+    url: jdbc:mysql://127.0.0.1:3306/upms
+    driverClass: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    initial-size: 1
+    min-idle: 1
+    max-active: 20
+    test-on-borrow: true
+    max-wait: 60000
+    time-between-eviction-runs-millis: 60000
+    min-evictable-idle-time-millis: 300000
+    validation-query: SELECT 1
+    test-While-Idle: true
+    test-on-return: false
+    pool-prepared-statements: false
+    max-pool-prepared-statement-per-connection-size: 20
+    filters: stat,wall,log4j,config
+    connection-properties: druid.stat.memvnrgeSql=true;druid.stat.slowSqlMillis=5000;config.decrypt=false
