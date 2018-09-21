@@ -38,3 +38,8 @@ druid:
     max-pool-prepared-statement-per-connection-size: 20
     filters: stat,wall,log4j,config
     connection-properties: druid.stat.memvnrgeSql=true;druid.stat.slowSqlMillis=5000;config.decrypt=false
+spring:
+  kafka:
+    bootstrap-servers:
+
+
