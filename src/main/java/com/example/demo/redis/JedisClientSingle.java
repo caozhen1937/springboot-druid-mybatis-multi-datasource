@@ -8,6 +8,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisException;
 
+import java.util.Collections;
+
 /**
  * Created by caozhen on 2018/11/23
  */
@@ -16,6 +18,12 @@ import redis.clients.jedis.exceptions.JedisException;
 public class JedisClientSingle implements JedisClient {
 
     static Logger logger = LoggerFactory.getLogger(JedisClientSingle.class);
+
+    private static final String LOCK_SUCCESS = "OK";
+    private static final String SET_IF_NOT_EXIST = "NX";
+    private static final String SET_WITH_EXPIRE_TIME = "PX";
+
+    private static final Long RELEASE_SUCCESS = 1L;
 
     @Autowired
     public JedisPool jedisPool;
@@ -131,4 +139,46 @@ public class JedisClientSingle implements JedisClient {
         resource.close();
         return hdel;
     }
+
+
+    /**
+     * 分布式锁 加锁
+     * @param jedisPool
+     * @param lockKey
+     * @param requestId
+     * @param expireTime
+     * @return  是否获取成功
+     */
+   public Boolean tryGetDistributedLock (JedisPool jedisPool,String lockKey,String requestId,int expireTime){
+        // 保证 设置锁操作 和 对锁加过期时间操作 的原子性，避免前者执行成功，后者执行失败，从而避免了死锁
+       String res = jedisPool.getResource().set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, 200);
+
+       if(LOCK_SUCCESS.equals(res)){
+           return true;
+       }
+
+       return false;
+   }
+
+    /**
+     * 分布式锁 解锁
+     * @param jedisPool
+     * @param lockKey
+     * @param requestId
+     * @return 是否解锁成功
+     */
+    public static boolean releaseDistributedLock(JedisPool jedisPool, String lockKey, String requestId){
+
+        // lua 代码，保证 验证锁是否存在操作 和删除锁操作 的原子性，保证谁加锁谁来解锁，避免任一线程解锁
+        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        Object result = jedisPool.getResource().eval(script, Collections.singletonList(lockKey), Collections.singletonList(requestId));
+
+        if (RELEASE_SUCCESS.equals(result)) {
+            return true;
+        }
+
+       return false;
+    }
+
+
 }
