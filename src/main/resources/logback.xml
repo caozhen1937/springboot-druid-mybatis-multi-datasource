@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="log.path" value="logs"/>
+    <property name="APP_NAME" value="dmp-service"/>
+
+    <!-- 读取application的属性,name指定变量名，source指定要读取的名称 -->
+    <springProperty scope="context" name="logdir" source="log.dir" />
+    <!-- 对application中的所有属性生效 -->
+    <property resource="application.properties"/>
+
+    <!--获取格式化时间字符串-->
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+    <timestamp key="hourTime" datePattern="yyyyMMdd'T'HH"/>
+    <!--设置上下文名称,用于区分不同日志-->
+    <contextName>${APP_NAME}</contextName>
+
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,GMT+8}] [%thread] %-5level %logger{72}[%L] - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+
+    <appender name="LogFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.path}/${log.name}.log</File>
+        <Append>true</Append>
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,GMT+8}] [%thread] %-5level %logger{72}[%L] - %msg%n</pattern>
+        </encoder>
+        <!-- 过滤出 INFO 级别以上的日志（info、error) -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/${log.name}.%d{yyyy-MM-dd }.%i.log</fileNamePattern>
+            <!-- 如果按天来回滚，则最大保存时间为365天，365天之前的都将被清理掉 -->
+            <maxHistory>365</maxHistory>
+            <!-- 日志总保存量为10GB -->
+            <totalSizeCap>10GB</totalSizeCap>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!--文件达到 最大128MB时会被压缩和切割 -->
+                <maxFileSize>128 MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="AppInfoFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.path}/${app.log.info.name}.log</File>
+        <Append>true</Append>
+        <encoder>
+            <pattern>%m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/${app.log.info.name}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${log.max.history}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+
+    <appender name="AppErrorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.path}/${app.log.error.name}.log</File>
+        <Append>true</Append>
+        <encoder>
+            <pattern>%m%n</pattern>
+        </encoder>
+        <!-- 只过滤出 ERROR 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/${app.log.error.name}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${log.max.history}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="DAYFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logFile.log</file>
+        <Append>true</Append>
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,GMT+8}] [%thread] %-5level %logger{72}[%L] - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${log.path}/${APP_NAME}.%d{yyyyMMdd}.log</fileNamePattern>
+            <!-- keep 30 days' worth of history capped at 3GB total size -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    <!--<logger name="org.springframework" level="DEBUG"/>-->
+    <!--<logger name="org.apache" level="DEBUG"/>-->
+    <!--mybatis 日志打印-->
+    <!--<logger name="org.yongche.mapper” level="DEBUG"/>-->
+    <!-- 定义logger，每个级别的日志分别输出到不同的文件 -->
+    <logger name="appLog">
+        <appender-ref ref="AppInfoFile"/>
+        <appender-ref ref="AppErrorFile"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="LogFile"/>
+        <appender-ref ref="DAYFILE"/>
+    </root>
+</configuration>

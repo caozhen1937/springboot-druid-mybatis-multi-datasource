@@ -36,8 +36,9 @@ public class BubbleSort {
 
         }
 
-        for (int i=0; i<a.length; i++)
+        for (int i=0; i<a.length; i++) {
             System.out.printf("%d ", a[i]);
+        }
         System.out.printf("\n");
 
     }
