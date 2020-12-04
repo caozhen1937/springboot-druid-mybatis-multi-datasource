@@ -28,15 +28,15 @@ public class JedisClientSingle implements JedisClient {
     @Autowired
     public JedisPool jedisPool;
 
-    public Jedis getResource(){
+    public Jedis getResource() {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
 
-        } catch (JedisException e){
+        } catch (JedisException e) {
             logger.error(e.getMessage());
         }
-        return jedis ;
+        return jedis;
     }
 
     /**
@@ -44,7 +44,7 @@ public class JedisClientSingle implements JedisClient {
      *
      * @param jedis
      */
-    public void returnBrokenResource(Jedis jedis){
+    public void returnBrokenResource(Jedis jedis) {
         if (jedis != null) {
             jedisPool.returnBrokenResource(jedis);
         }
@@ -55,12 +55,11 @@ public class JedisClientSingle implements JedisClient {
      *
      * @param jedis
      */
-    public void returnResource(Jedis jedis){
+    public void returnResource(Jedis jedis) {
         if (jedis != null) {
             jedisPool.returnResource(jedis);
         }
     }
-
 
 
     @Override
@@ -143,31 +142,33 @@ public class JedisClientSingle implements JedisClient {
 
     /**
      * 分布式锁 加锁
+     *
      * @param jedisPool
      * @param lockKey
      * @param requestId
      * @param expireTime
-     * @return  是否获取成功
+     * @return 是否获取成功
      */
-   public Boolean tryGetDistributedLock (JedisPool jedisPool,String lockKey,String requestId,int expireTime){
+    public Boolean tryGetDistributedLock(JedisPool jedisPool, String lockKey, String requestId, int expireTime) {
         // 保证 设置锁操作 和 对锁加过期时间操作 的原子性，避免前者执行成功，后者执行失败，从而避免了死锁
-       String res = jedisPool.getResource().set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, 200);
+        String res = jedisPool.getResource().set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, expireTime);
 
-       if(LOCK_SUCCESS.equals(res)){
-           return true;
-       }
+        if (LOCK_SUCCESS.equals(res)) {
+            return true;
+        }
 
-       return false;
-   }
+        return false;
+    }
 
     /**
      * 分布式锁 解锁
+     *
      * @param jedisPool
      * @param lockKey
      * @param requestId
      * @return 是否解锁成功
      */
-    public static boolean releaseDistributedLock(JedisPool jedisPool, String lockKey, String requestId){
+    public static boolean releaseDistributedLock(JedisPool jedisPool, String lockKey, String requestId) {
 
         // lua 代码，保证 验证锁是否存在操作 和删除锁操作 的原子性，保证谁加锁谁来解锁，避免任一线程解锁
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
@@ -177,7 +178,7 @@ public class JedisClientSingle implements JedisClient {
             return true;
         }
 
-       return false;
+        return false;
     }
 
 

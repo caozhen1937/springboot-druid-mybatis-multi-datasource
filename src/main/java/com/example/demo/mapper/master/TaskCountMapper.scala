@@ -1,5 +1,7 @@
 package com.example.demo.mapper.master
 
+import org.apache.ibatis.annotations.Mapper
+
 /**
   * yarn任务统计
   */
@@ -7,6 +9,6 @@ package com.example.demo.mapper.master
 @Mapper
 trait TaskCountMapper {
 
-  def count():Long
+  def count(): Long
 
 }

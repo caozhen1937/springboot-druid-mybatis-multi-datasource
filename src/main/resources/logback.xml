@@ -7,6 +7,7 @@
     <!-- 读取application的属性,name指定变量名，source指定要读取的名称 -->
     <springProperty scope="context" name="logdir" source="log.dir" />
     <!-- 对application中的所有属性生效 -->
+    <!-- 注意：当在外面指定java -jar application配置文件时，可能会读不到 外边的配置，会首先读取jar内配置的-->
     <property resource="application.properties"/>
 
     <!--获取格式化时间字符串-->

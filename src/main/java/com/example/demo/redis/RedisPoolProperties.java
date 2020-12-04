@@ -69,9 +69,9 @@ public class RedisPoolProperties {
 
     public JedisPool getJedisPool() {
         if (this.password != null && this.password.trim().length() > 0) {
-            this.jedisPool = new JedisPool(this.jedisPoolConfig, this.host, this.port, 6000, this.password, this.database,(String)null);
+            this.jedisPool = new JedisPool(this.jedisPoolConfig, this.host, this.port, 6000, this.password, this.database, (String) null);
         } else {
-            this.jedisPool = new JedisPool(this.jedisPoolConfig, this.host, this.port, 6000,(String)null, this.database,(String)null);
+            this.jedisPool = new JedisPool(this.jedisPoolConfig, this.host, this.port, 6000, (String) null, this.database, (String) null);
         }
 
         return this.jedisPool;
